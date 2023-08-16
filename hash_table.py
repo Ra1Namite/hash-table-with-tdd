@@ -1,4 +1,6 @@
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Type
+
+DELETED = object()  # sentinel value to represent deleted value
 
 
 class Pair(NamedTuple):
@@ -10,19 +12,30 @@ class HashTable:
     def __init__(self, capacity: int):
         if capacity < 1:
             raise ValueError("Capacity must be a positive number")
-        self._slots: list[Pair | None] = capacity * [None]
+        self._slots: list[Pair | None | object] = capacity * [None]
 
     def __len__(self):
         return len(self.pairs)
 
     def __setitem__(self, key, value):
-        self._slots[self._index(key)] = Pair(key, value)
+        for index, pair in self._probe(key):
+            if pair is DELETED:
+                continue
+            if pair is None or pair.key == key:
+                self._slots[index] = Pair(key, value)
+                break
+        else:
+            raise MemoryError("Not enough capacity")
 
     def __getitem__(self, key):
-        pair = self._slots[self._index(key)]
-        if pair is None:
-            raise KeyError(key)
-        return pair.value
+        for _, pair in self._probe(key):
+            if pair is None:
+                raise KeyError(key)
+            if pair is DELETED:
+                continue
+            if pair.key == key:
+                return pair.value
+        raise KeyError(key)
 
     def __contains__(self, key):
         try:
@@ -39,8 +52,14 @@ class HashTable:
             return default
 
     def __delitem__(self, key):
-        if key in self:
-            self._slots[self._index(key)] = None
+        for index, pair in self._probe(key):
+            if pair is None:
+                raise KeyError(key)
+            if pair is DELETED:
+                continue
+            if pair.key == key:
+                self._slots[index] = DELETED
+                break
         else:
             raise KeyError(key)
 
@@ -49,7 +68,7 @@ class HashTable:
 
     @property
     def pairs(self):
-        return {pair for pair in self._slots if pair}
+        return {pair for pair in self._slots if pair not in (None, DELETED)}
 
     @property
     def values(self):
@@ -92,3 +111,9 @@ class HashTable:
 
     def copy(self):
         return HashTable.from_dict(dict(self.pairs), self.capacity)
+
+    def _probe(self, key):
+        index = self._index(key)
+        for _ in range(self.capacity):
+            yield index, self._slots[index]
+            index = (index + 1) % self.capacity

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from pytest_unordered import unordered
 
@@ -307,3 +309,11 @@ def test_should_compare_equal_different_capacity():
     h1 = HashTable.from_dict(data, capacity=50)
     h2 = HashTable.from_dict(data, capacity=100)
     assert h1 == h2
+
+
+def test_should_detect_hash_collision():
+    assert hash("foobar") not in [1, 2, 3]
+    with patch("builtins.hash", side_effect=[1, 2, 3]):
+        assert hash("foobar") == 1
+        assert hash("foobar") == 2
+        assert hash("foobar") == 3
