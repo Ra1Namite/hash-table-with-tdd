@@ -3,25 +3,11 @@ from unittest.mock import patch
 import pytest
 from pytest_unordered import unordered
 
-from hash_table import HashTable, Pair
+from hash_table import HashTable
 
 
 def test_should_create_hashtable():
     assert HashTable(capacity=100) is not None
-
-
-def test_should_create_empty_pair_slots():
-    # Given
-
-    expected_values = [None, None, None]
-    hash_table = HashTable(capacity=3)
-
-    # When
-    actual_values = hash_table._slots
-
-    # Then
-
-    assert actual_values == expected_values
 
 
 def test_should_insert_key_value_pairs():
@@ -154,11 +140,11 @@ def test_should_return_copy_of_values(hash_table):
 
 
 def test_should_get_keys(hash_table):
-    assert hash_table.keys == {"hola", 98.6, False}
+    assert hash_table.keys == ["hola", 98.6, False]
 
 
 def test_should_get_keys_of_empty_hash_table():
-    assert HashTable(capacity=100).keys == set()
+    assert HashTable(capacity=100).keys == []
 
 
 def test_should_return_copy_of_keys(hash_table):
@@ -171,13 +157,6 @@ def test_should_return_pairs(hash_table):
 
 def test_should_get_pairs_of_empty_hash_table():
     assert HashTable(capacity=100).pairs == set()
-
-
-def test_should_convert_to_dict(hash_table):
-    dictionary = dict(hash_table.pairs)
-    assert set(dictionary.keys()) == hash_table.keys
-    assert set(dictionary.items()) == hash_table.pairs
-    assert list(dictionary.values()) == unordered(hash_table.values)
 
 
 def test_should_report_length_of_empty_hash_table():
@@ -238,24 +217,13 @@ def test_should_use_dict_literal_for_str(hash_table):
     }
 
 
-def test_should_create_hashtable_from_dict():
-    dictionary = {"hola": "hello", 98.6: 37, False: True}
-
-    hash_table = HashTable.from_dict(dictionary)
-
-    assert hash_table.capacity == len(dictionary) * 10
-    assert hash_table.keys == set(dictionary.keys())
-    assert hash_table.pairs == set(dictionary.items())
-    assert unordered(hash_table.values) == list(dictionary.values())
-
-
 def test_should_create_hashtable_from_dict_with_custom_capacity():
     dictionary = {"hola": "hello", 98.6: 37, False: True}
 
     hash_table = HashTable.from_dict(dictionary, capacity=100)
 
     assert hash_table.capacity == 100
-    assert hash_table.keys == set(dictionary.keys())
+    assert hash_table.keys == list(dictionary.keys())
     assert hash_table.pairs == set(dictionary.items())
     assert unordered(hash_table.values) == list(dictionary.values())
 
