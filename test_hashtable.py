@@ -223,3 +223,87 @@ def test_should_iterate_over_pairs(hash_table):
 def test_should_iterate_over_instance(hash_table):
     for key in hash_table:
         assert key in ("hola", 98.6, False)
+
+
+def test_should_use_dict_literal_for_str(hash_table):
+    assert str(hash_table) in {
+        "{'hola': 'hello', 98.6: 37, False: True}",
+        "{'hola': 'hello', False: True, 98.6: 37}",
+        "{98.6: 37, 'hola': 'hello', False: True}",
+        "{98.6: 37, False: True, 'hola': 'hello'}",
+        "{False: True, 'hola': 'hello', 98.6: 37}",
+        "{False: True, 98.6: 37, 'hola': 'hello'}",
+    }
+
+
+def test_should_create_hashtable_from_dict():
+    dictionary = {"hola": "hello", 98.6: 37, False: True}
+
+    hash_table = HashTable.from_dict(dictionary)
+
+    assert hash_table.capacity == len(dictionary) * 10
+    assert hash_table.keys == set(dictionary.keys())
+    assert hash_table.pairs == set(dictionary.items())
+    assert unordered(hash_table.values) == list(dictionary.values())
+
+
+def test_should_create_hashtable_from_dict_with_custom_capacity():
+    dictionary = {"hola": "hello", 98.6: 37, False: True}
+
+    hash_table = HashTable.from_dict(dictionary, capacity=100)
+
+    assert hash_table.capacity == 100
+    assert hash_table.keys == set(dictionary.keys())
+    assert hash_table.pairs == set(dictionary.items())
+    assert unordered(hash_table.values) == list(dictionary.values())
+
+
+def test_should_have_canonical_string_representation(hash_table):
+    assert repr(hash_table) in {
+        "HashTable.from_dict({'hola': 'hello', 98.6: 37, False: True})",
+        "HashTable.from_dict({'hola': 'hello', False: True, 98.6: 37})",
+        "HashTable.from_dict({98.6: 37, 'hola': 'hello', False: True})",
+        "HashTable.from_dict({98.6: 37, False: True, 'hola': 'hello'})",
+        "HashTable.from_dict({False: True, 'hola': 'hello', 98.6: 37})",
+        "HashTable.from_dict({False: True, 98.6: 37, 'hola': 'hello'})",
+    }
+
+
+def test_should_compare_equal_to_itself(hash_table):
+    assert hash_table == hash_table
+
+
+def test_should_compare_equal_to_copy(hash_table):
+    assert hash_table is not hash_table.copy()
+    assert hash_table == hash_table.copy()
+
+
+def test_should_compare_equal_different_key_value_order(hash_table):
+    h1 = HashTable.from_dict({"a": 1, "b": 2, "c": 3})
+    h2 = HashTable.from_dict({"b": 2, "a": 1, "c": 3})
+    assert h1 == h2
+
+
+def test_should_compare_unequal(hash_table):
+    other = HashTable.from_dict({"different": "value"})
+    assert hash_table != other
+
+
+def test_should_compare_unequal_another_data_type(hash_table):
+    assert hash_table != 42
+
+
+def test_should_copy_keys_values_pairs_capacity(hash_table):
+    copy = hash_table.copy()
+    assert copy is not hash_table
+    assert set(hash_table.keys) == set(copy.keys)
+    assert unordered(hash_table.values) == copy.values
+    assert set(hash_table.pairs) == set(copy.pairs)
+    assert hash_table.capacity == copy.capacity
+
+
+def test_should_compare_equal_different_capacity():
+    data = {"a": 1, "b": 2, "c": 3}
+    h1 = HashTable.from_dict(data, capacity=50)
+    h2 = HashTable.from_dict(data, capacity=100)
+    assert h1 == h2

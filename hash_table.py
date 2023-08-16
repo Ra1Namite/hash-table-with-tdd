@@ -65,3 +65,30 @@ class HashTable:
 
     def __iter__(self):
         yield from self.keys
+
+    def __str__(self):
+        pairs = []
+        for key, value in self.pairs:
+            pairs.append(f"{key!r}: {value!r}")
+        return "{" + ", ".join(pairs) + "}"
+
+    @classmethod
+    def from_dict(cls, dictionary: dict, capacity=None):
+        hash_table = cls(capacity or len(dictionary) * 10)
+        for key, value in dictionary.items():
+            hash_table[key] = value
+        return hash_table
+
+    def __repr__(self):
+        cls = self.__class__.__name__
+        return f"{cls}.from_dict({str(self)})"
+
+    def __eq__(self, other):
+        if self is other:
+            return True
+        if type(self) is not type(other):
+            return False
+        return set(self.pairs) == set(other.pairs)
+
+    def copy(self):
+        return HashTable.from_dict(dict(self.pairs), self.capacity)
