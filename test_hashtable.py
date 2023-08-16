@@ -8,18 +8,14 @@ def test_should_create_hashtable():
     assert HashTable(capacity=100) is not None
 
 
-def test_should_report_capacity():
-    assert len(HashTable(capacity=100)) == 100
-
-
-def test_should_create_empty_value_slots():
+def test_should_create_empty_pair_slots():
     # Given
 
     expected_values = [None, None, None]
     hash_table = HashTable(capacity=3)
 
     # When
-    actual_values = hash_table._pairs
+    actual_values = hash_table._slots
 
     # Then
 
@@ -35,7 +31,7 @@ def test_should_insert_key_value_pairs():
     assert ("hola", "hello") in hash_table.pairs
     assert (98.6, 37) in hash_table.pairs
     assert (False, True) in hash_table.pairs
-    assert len(hash_table) == 100
+    assert len(hash_table) == 3
 
 
 @pytest.mark.skip
@@ -102,12 +98,12 @@ def test_should_get_value_with_default(hash_table: HashTable):
 def test_should_delete_key_value_pair(hash_table: HashTable):
     assert "hola" in hash_table
     assert ("hola", "hello") in hash_table.pairs
-    assert len(hash_table) == 100
+    assert len(hash_table) == 3
     del hash_table["hola"]
 
     assert "hola" not in hash_table
     assert ("hola", "hello") not in hash_table.pairs
-    assert len(hash_table) == 100
+    assert len(hash_table) == 2
 
 
 def test_should_raise_key_error_when_deleting(hash_table: HashTable):
@@ -124,7 +120,7 @@ def test_should_update_value(hash_table: HashTable):
     assert hash_table["hola"] == "hallo"
     assert hash_table[98.6] == 37
     assert hash_table[False] is True
-    assert len(hash_table) == 100
+    assert len(hash_table) == 3
 
 
 def test_should_return_copy_of_pairs(hash_table):
@@ -180,3 +176,50 @@ def test_should_convert_to_dict(hash_table):
     assert set(dictionary.keys()) == hash_table.keys
     assert set(dictionary.items()) == hash_table.pairs
     assert list(dictionary.values()) == unordered(hash_table.values)
+
+
+def test_should_report_length_of_empty_hash_table():
+    assert len(HashTable(capacity=100)) == 0
+
+
+def test_should_not_create_hashtable_with_zero_capacity():
+    with pytest.raises(ValueError):
+        HashTable(capacity=0)
+
+
+def test_should_not_create_hashtable_with_negative_capacity():
+    with pytest.raises(ValueError):
+        HashTable(capacity=-100)
+
+
+def test_should_report_length(hash_table):
+    assert len(hash_table) == 3
+
+
+def test_should_report_capacity_of_empty_hash_table():
+    assert HashTable(capacity=100).capacity == 100
+
+
+def test_should_report_capacity(hash_table):
+    assert hash_table.capacity == 100
+
+
+def test_should_iterate_over_keys(hash_table):
+    for key in hash_table.keys:
+        assert key in ("hola", 98.6, False)
+
+
+def test_should_iterate_over_values(hash_table):
+    for value in hash_table.values:
+        assert value in ("hello", 37, True)
+
+
+def test_should_iterate_over_pairs(hash_table):
+    for key, value in hash_table.pairs:
+        assert key in hash_table.keys
+        assert value in hash_table.values
+
+
+def test_should_iterate_over_instance(hash_table):
+    for key in hash_table:
+        assert key in ("hola", 98.6, False)
